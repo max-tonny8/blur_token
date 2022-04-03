@@ -1,4 +1,7 @@
 {
   "name": "cmpe-project",
-  "packageManager": "yarn@3.2.0"
+  "packageManager": "yarn@3.2.0",
+  "workspaces": [
+    "packages/*"
+  ]
 }
