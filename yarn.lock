@@ -2009,6 +2009,7 @@ __metadata:
     "@types/react-dom": 18.0.4
     eslint: 8.15.0
     eslint-config-next: 12.1.6
+    hardhat-project: "workspace:*"
     next: 12.1.6
     react: 18.1.0
     react-dom: 18.1.0
@@ -7081,7 +7082,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat-project@workspace:packages/hardhat":
+"hardhat-project@workspace:*, hardhat-project@workspace:packages/hardhat":
   version: 0.0.0-use.local
   resolution: "hardhat-project@workspace:packages/hardhat"
   dependencies:
