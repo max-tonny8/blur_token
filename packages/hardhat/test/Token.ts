@@ -4,7 +4,6 @@ import {Token as TokenContract} from "../typechain-types/Token";
 // We import Chai to use its asserting functions here.
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 
