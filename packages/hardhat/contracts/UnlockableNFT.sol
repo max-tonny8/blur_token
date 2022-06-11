@@ -17,6 +17,8 @@ contract UnlockableNFT is ERC721URIStorage {
         address payable owner;
         address creator;
         uint256 price;
+        string name;
+        string description;
         string publicURL;
         string unlockableURL;
         NFTState state;
@@ -28,33 +30,28 @@ contract UnlockableNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    address payable owner;
-
     string myname = "Unlockable NFT";
 
     uint256 money = 0;
 
-    constructor() ERC721("Metaverse Tokens", "METT") {
-        owner = payable(msg.sender);
-    }
+    constructor() ERC721("Metaverse Tokens", "METT") {}
 
     function updateNFT(
         uint256 _id,
         uint256 _price,
         bool _onSale
     ) public {
-        require(msg.sender == owner, "Only the owner can sell NFT");
+        require(msg.sender == nfts[_id].owner, "Only the owner can sell NFT");
         require(
             nfts[_id].state != NFTState.WaitingForApproval,
             "Item is already waiting for approval"
         );
         require(_id > 0);
-        require(_price > 0);
         // require(nfts[_id].state == false);
         if (_onSale == true) {
-            require(nfts[_id].state == NFTState.onSale);
+            nfts[_id].state = NFTState.onSale;
         } else {
-            require(nfts[_id].state == NFTState.Sold);
+            nfts[_id].state = NFTState.Sold;
         }
         nfts[_id].price = _price;
     }
@@ -111,6 +108,7 @@ contract UnlockableNFT is ERC721URIStorage {
         );
 
         require(nfts[_id].state == NFTState.WaitingForApproval);
+        nfts[_id].owner.transfer(nfts[_id].price);
         _transfer(nfts[_id].owner, nfts[_id].nextOwner, _id);
 
         nfts[_id].owner = nfts[_id].nextOwner;

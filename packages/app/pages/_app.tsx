@@ -5,6 +5,7 @@ import {
   getDefaultWallets,
   RainbowKitProvider,
   ConnectButton,
+  darkTheme,
 } from "@rainbow-me/rainbowkit";
 import {
   allChains,
@@ -86,6 +87,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             coolMode
             showRecentTransactions={true}
             chains={chains}
+            theme={darkTheme()}
           >
             <ThemeProvider theme={theme}>
               <CssBaseline />
