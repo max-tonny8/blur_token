@@ -42,7 +42,7 @@ contract Token {
      * The `external` modifier makes a function *only* callable from outside
      * the contract.
      */
-    function transfer(address to, uint256 amount) external {
+    function transfer(address to, uint256 amount) external payable {
         console.log("Sender balance is %s tokens", balances[msg.sender]);
         console.log("Trying to send %s tokens to %s", amount, to);
 
@@ -56,6 +56,20 @@ contract Token {
         balances[to] += amount;
     }
 
+    receive() external payable {
+        console.log("Received %s tokens from %s", msg.value, msg.sender);
+        balances[msg.sender] += msg.value;
+    }
+
+    fallback() external payable {
+        console.log(
+            "FALLBACK Received %s tokens from %s",
+            msg.value,
+            msg.sender
+        );
+        balances[msg.sender] += msg.value;
+    }
+
     /**
      * Read only function to retrieve the token balance of a given account.
      *
@@ -63,6 +77,6 @@ contract Token {
      * state, which allows us to call it without executing a transaction.
      */
     function balanceOf(address account) external view returns (uint256) {
-        return balances[account];
+        return balances[account] * 3;
     }
 }

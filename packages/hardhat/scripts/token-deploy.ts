@@ -12,6 +12,10 @@ async function main() {
   
     console.log("Token address:", token.address);
     console.log("Token owner:", await token.owner());
+    console.log("Token before:", await token.balanceOf(deployer.address));
+    console.log("Token trx:", await token.transfer("0x0000000000000000000000000000000000000000", 300));
+  
+    console.log("Token after:", await token.balanceOf(deployer.address));
     console.log("Account balance:", (await deployer.getBalance()).toString());
 
   }

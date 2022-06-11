@@ -1,4 +1,4 @@
-import {Token as TokenContract} from "../typechain-types/Token";
+import {Token as TokenContract} from "../typechain-types";
 
 // https://hardhat.org/tutorial/testing-contracts.html
 // We import Chai to use its asserting functions here.
