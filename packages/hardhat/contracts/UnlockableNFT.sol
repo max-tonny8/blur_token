@@ -41,22 +41,26 @@ contract UnlockableNFT is ERC721URIStorage {
         uint256 _price,
         bool _onSale
     ) public {
-        require(msg.sender == nfts[_id].owner, "Only the owner can sell NFT");
+        NFT storage nft = nfts[_id];
+
+        require(msg.sender == nft.owner, "Only the owner can sell NFT");
         require(
-            nfts[_id].state != NFTState.WaitingForApproval,
+            nft.state != NFTState.WaitingForApproval,
             "Item is already waiting for approval"
         );
         require(_id > 0);
-        // require(nfts[_id].state == false);
+        // require(nft.state == false);
         if (_onSale == true) {
-            nfts[_id].state = NFTState.onSale;
+            nft.state = NFTState.onSale;
         } else {
-            nfts[_id].state = NFTState.Sold;
+            nft.state = NFTState.Sold;
         }
-        nfts[_id].price = _price;
+        nft.price = _price;
     }
 
     function createNFT(
+        string memory name,
+        string memory description,
         string memory _publicURL,
         string memory _unlockableURL,
         uint256 _price
@@ -68,13 +72,17 @@ contract UnlockableNFT is ERC721URIStorage {
 
         _mint(msg.sender, _id);
 
-        nfts[_id].id = _id;
-        nfts[_id].owner = payable(msg.sender);
-        nfts[_id].creator = msg.sender;
-        nfts[_id].publicURL = _publicURL;
-        nfts[_id].unlockableURL = _unlockableURL;
-        nfts[_id].price = _price;
-        nfts[_id].state = NFTState.Sold;
+        NFT storage nft = nfts[_id];
+
+        nft.id = _id;
+        nft.name = name;
+        nft.description = description;
+        nft.owner = payable(msg.sender);
+        nft.creator = msg.sender;
+        nft.publicURL = _publicURL;
+        nft.unlockableURL = _unlockableURL;
+        nft.price = _price;
+        nft.state = NFTState.Sold;
     }
 
     function fetchNFTs() public view returns (NFT[] memory) {
@@ -82,7 +90,7 @@ contract UnlockableNFT is ERC721URIStorage {
         NFT[] memory items = new NFT[](itemCount);
 
         for (uint256 i = 1; i <= itemCount; i++) {
-            NFT storage currentItem = nfts[i];
+            NFT memory currentItem = nfts[i];
             items[i - 1] = currentItem;
         }
         return items;
@@ -90,32 +98,33 @@ contract UnlockableNFT is ERC721URIStorage {
 
     function buyNFT(uint256 _id) public payable {
         require(_id > 0);
-        require(nfts[_id].state == NFTState.onSale);
-        require(nfts[_id].owner != msg.sender);
+        NFT storage nft = nfts[_id];
 
-        require(msg.value >= nfts[_id].price);
+        require(nft.state == NFTState.onSale);
+        require(nft.owner != msg.sender);
+
+        require(msg.value >= nft.price);
 
         money += msg.value;
 
-        nfts[_id].state = NFTState.WaitingForApproval;
-        nfts[_id].nextOwner = payable(msg.sender);
+        nft.state = NFTState.WaitingForApproval;
+        nft.nextOwner = payable(msg.sender);
     }
 
     function approveSale(uint256 _id, string memory newUnlockableURL) public {
-        require(
-            msg.sender == nfts[_id].owner,
-            "Only the owner can approve NFT"
-        );
+        NFT storage nft = nfts[_id];
 
-        require(nfts[_id].state == NFTState.WaitingForApproval);
-        nfts[_id].owner.transfer(nfts[_id].price);
-        _transfer(nfts[_id].owner, nfts[_id].nextOwner, _id);
+        require(msg.sender == nft.owner, "Only the owner can approve NFT");
 
-        nfts[_id].owner = nfts[_id].nextOwner;
-        nfts[_id].nextOwner = payable(0);
-        nfts[_id].unlockableURL = newUnlockableURL;
+        require(nft.state == NFTState.WaitingForApproval);
+        nft.owner.transfer(nft.price);
+        _transfer(nft.owner, nft.nextOwner, _id);
 
-        nfts[_id].state = NFTState.Sold;
+        nft.owner = nft.nextOwner;
+        nft.nextOwner = payable(0);
+        nft.unlockableURL = newUnlockableURL;
+
+        nft.state = NFTState.Sold;
     }
 
     function greet() public view returns (string memory) {

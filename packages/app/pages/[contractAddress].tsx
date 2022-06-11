@@ -5,6 +5,12 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
   Typography,
 } from "@mui/material";
 import { ethers } from "ethers";
@@ -14,11 +20,12 @@ import {
 } from "../../hardhat/typechain-types";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAccount, useSigner, useContract, useContractRead } from "wagmi";
 
 import UnlockableNFTJSON from "../../hardhat/artifacts/contracts/UnlockableNFT.sol/UnlockableNFT.json";
 import { Blurhash } from "react-blurhash";
+import { encodeImageToBlurhash } from "../src/blurhashHelper";
 
 enum NFTState {
   onSale,
@@ -48,6 +55,16 @@ const ContractPage = (props: { contractAddress: string }) => {
     }
   ) as { data?: UnlockableNFT.NFTStructOutput[]; isLoading: boolean };
 
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   if (isAccountSuccess && isSignerSuccess && account && signer) {
     console.log("signer: ", account, contract, UnlockableNFTJSON);
 
@@ -74,20 +91,26 @@ const ContractPage = (props: { contractAddress: string }) => {
           payment
         </button>
 
-        <button
-          onClick={async () => {
-            console.log(
-              "createNFT",
-              await contract.createNFT(
-                "|EHV6nWB2yk8$NxujFNGt6pyo0adR*=ss:I[R%of.7kCMdnjx]S2NHs:i_S#M|%1%2ENRis9ai%1Sis.slNHW:WBxZ%2NbogaekBW;ofo0NHS4j?W?WBsloLR+oJofS2s:ozj@s:jaR*Wps.j[RkT0of%2afR*fkoJjZof",
-                "https://lh3.googleusercontent.com/WmaRv4FGAXhUp1XArydCgLToQaWLHMd8qxO_14ti0kGso7Iv9xIPy1qgPTajB6ThpHaUzFfY_7vG_bxlNRSv8FWfaJak4MEJ2fKxpw=s0",
-                ethers.utils.parseEther("3")
-              )
-            );
-          }}
-        >
+        <Button variant="outlined" onClick={handleClickOpen}>
           createNFT
-        </button>
+        </Button>
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          scroll="paper"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Use Google's location service?"}
+          </DialogTitle>
+          <DialogContent>
+            <MintNFT contractAddress={props.contractAddress} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Close</Button>
+          </DialogActions>
+        </Dialog>
 
         <button
           onClick={async () => {
@@ -282,6 +305,108 @@ const ContractPage = (props: { contractAddress: string }) => {
   } else {
     return <div>fail</div>;
   }
+};
+
+const toBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+
+const MintNFT = (props: { contractAddress: string }) => {
+  const { data: account, isSuccess: isAccountSuccess } = useAccount();
+  const { data: signer, isSuccess: isSignerSuccess } = useSigner();
+
+  const contract = useContract<UnlockableNFT>({
+    addressOrName: props.contractAddress,
+    contractInterface: UnlockableNFTJSON.abi,
+    signerOrProvider: signer,
+  });
+
+  const mint = async () => {
+    console.log(
+      "createNFT",
+      await contract.createNFT(
+        "super nft" + Math.random(),
+        "super description" + Math.random(),
+        (await encodeImageToBlurhash(
+          "https://lh3.googleusercontent.com/WmaRv4FGAXhUp1XArydCgLToQaWLHMd8qxO_14ti0kGso7Iv9xIPy1qgPTajB6ThpHaUzFfY_7vG_bxlNRSv8FWfaJak4MEJ2fKxpw=s0"
+        )) || "",
+        "https://lh3.googleusercontent.com/WmaRv4FGAXhUp1XArydCgLToQaWLHMd8qxO_14ti0kGso7Iv9xIPy1qgPTajB6ThpHaUzFfY_7vG_bxlNRSv8FWfaJak4MEJ2fKxpw=s0",
+        ethers.utils.parseEther("3"),
+        {}
+      )
+    );
+  };
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const [selectedFile, setselectedFile] = useState<File | null>(null);
+
+  const [base64Img, setbase64Img] = useState("");
+
+  const [blurImg, setblurImg] = useState("");
+  useEffect(() => {
+    if (selectedFile) {
+      toBase64(selectedFile).then((base64) => {
+        setbase64Img(base64);
+        encodeImageToBlurhash(base64).then((blurhash) => {
+          console.log("blurhash", blurhash);
+          setblurImg(blurhash);
+        });
+      });
+    }
+  }, [selectedFile]);
+
+  return (
+    <>
+      <TextField id="outlined-basic" label="Name" variant="outlined" />
+      <TextField id="outlined-basic" label="Description" variant="outlined" />
+      <TextField id="outlined-basic" label="Outlined" variant="outlined" />
+      <TextField id="outlined-basic" label="Outlined" variant="outlined" />
+
+      {blurImg && (
+        <Blurhash
+          hash={blurImg}
+          width={400}
+          height={300}
+          resolutionX={32}
+          resolutionY={32}
+          punch={1}
+        />
+      )}
+      {base64Img && <img src={base64Img} alt="" width={"500px"} />}
+
+      <input
+        type="file"
+        name="image"
+        ref={fileInput}
+        onChange={(e) => {
+          if (e.target.files?.length && e.target.files?.length > 0) {
+            setselectedFile(e.target.files[0]);
+          }
+        }}
+        style={{ display: "none" }}
+      />
+
+      <Button
+        className="upload-btn"
+        onClick={() => fileInput?.current?.click()}
+      >
+        Upload
+      </Button>
+
+      {[...new Array(50)]
+        .map(
+          () => `Cras mattis consectetur purus sit amet fermentum.
+Cras justo odio, dapibus ac facilisis in, egestas eget quam.
+Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`
+        )
+        .join("\n")}
+    </>
+  );
 };
 
 const GlowText = (props) => {
