@@ -140,16 +140,14 @@ const ContractPage = (props: { contractAddress: string }) => {
                         />
                         <CardContent>
                           <Typography gutterBottom variant="h6" component="div">
-                            Lizard id:{nft.id.toString()} eth:
+                            {nft.name} id:{nft.id.toString()} eth:
                             {nft.price.toString()}
                           </Typography>
                           <Typography gutterBottom variant="h6" component="div">
                             owner:0x...{nft.owner.slice(nft.owner.length - 6)}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Lizards are a widespread group of squamate reptiles,
-                            with over 6,000 species, ranging across all
-                            continents except Antarctica
+                            {nft.description}
                           </Typography>
                         </CardContent>
                         <CardActions>
