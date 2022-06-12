@@ -67,6 +67,7 @@ const ContractPage = (props: { contractAddress: string }) => {
     }
   ) as { data?: UnlockableNFT.NFTStructOutput[]; isLoading: boolean };
 
+  console.log("nfts", nfts);
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -82,27 +83,6 @@ const ContractPage = (props: { contractAddress: string }) => {
 
     return (
       <div>
-        <button
-          onClick={async () => {
-            console.log("owner", await contract.greet());
-          }}
-        >
-          owner
-        </button>
-
-        <button
-          onClick={async () => {
-            console.log(
-              "owner",
-              await contract.makePayment("payment", {
-                value: ethers.utils.parseEther("1"),
-              })
-            );
-          }}
-        >
-          payment
-        </button>
-
         <Button variant="outlined" onClick={handleClickOpen}>
           createNFT
         </Button>
@@ -113,9 +93,7 @@ const ContractPage = (props: { contractAddress: string }) => {
           aria-describedby="alert-dialog-description"
           scroll="paper"
         >
-          <DialogTitle id="alert-dialog-title">
-            {"Use Google's location service?"}
-          </DialogTitle>
+          <DialogTitle id="alert-dialog-title">{"Mint NFT"}</DialogTitle>
           <DialogContent>
             <MintNFT
               contractAddress={props.contractAddress}
@@ -127,54 +105,18 @@ const ContractPage = (props: { contractAddress: string }) => {
           </DialogActions>
         </Dialog>
 
-        <button
-          onClick={async () => {
-            console.log(
-              "change owner",
-              await contract.setGreeting("new" + Math.random())
-            );
-          }}
-        >
-          owner
-        </button>
-        <Button
-          onClick={async () => {
-            console.log(
-              "tx: ",
-
-              await signer.sendTransaction({
-                to: contract.address,
-                value: ethers.utils.parseEther("1"),
-              })
-            );
-          }}
-        >
-          Transfer
-        </Button>
-
-        <Button
-          onClick={async () => {
-            console.log(
-              "balance",
-              (await contract.balanceOf(account!.address)).toString()
-            );
-          }}
-        >
-          balance
-        </Button>
         <br />
         <GlowText>
           {!nftsLoading ? (
             <Box>
-              <div
+              {/* <div
                 style={{
                   wordWrap: "break-word",
                 }}
               >
                 {JSON.stringify(nfts)}
-              </div>
+              </div> */}
 
-              <br />
               <div
                 style={{
                   display: "flex",
