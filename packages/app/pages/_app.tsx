@@ -100,7 +100,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           >
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              <Container>
+              <Container maxWidth="xl">
                 <Typography variant="h4" align="center">
                   Decentralized Unlockable NFT Marketplace
                 </Typography>

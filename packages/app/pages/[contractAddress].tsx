@@ -137,7 +137,7 @@ const ContractPage = (props: { contractAddress: string }) => {
                 .reverse()
                 .map((nft) => {
                   return (
-                    <Card key={"id" + nft.id} sx={{ width: 400, margin: 2 }}>
+                    <Card key={"id" + nft.id} sx={{ width: 350, margin: 2 }}>
                       <CardMedia
                         component={UnlockImage}
                         unlockableURL={nft.unlockableURL}
