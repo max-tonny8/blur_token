@@ -31,11 +31,7 @@ contract UnlockableNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    string myname = "Unlockable NFT";
-
-    uint256 money = 0;
-
-    constructor() ERC721("Metaverse Tokens", "METT") {}
+    constructor() ERC721("Unlockable NFT", "UNFT") {}
 
     function updateNFT(
         uint256 _id,
@@ -106,8 +102,6 @@ contract UnlockableNFT is ERC721URIStorage {
 
         require(msg.value >= nft.price);
 
-        money += msg.value;
-
         nft.state = NFTState.WaitingForApproval;
         nft.nextOwner = payable(msg.sender);
         nft.nextOwnerPublicKey = publicKey;
@@ -128,20 +122,5 @@ contract UnlockableNFT is ERC721URIStorage {
         nft.unlockableURL = newUnlockableURL;
 
         nft.state = NFTState.Sold;
-    }
-
-    function greet() public view returns (string memory) {
-        return myname;
-    }
-
-    function setGreeting(string memory _greeting) public payable {
-        myname = _greeting;
-    }
-
-    function makePayment(string memory _greeting) public payable {
-        console.log("Payment made");
-        console.log(msg.value);
-        console.log(msg.sender);
-        money += msg.value;
     }
 }

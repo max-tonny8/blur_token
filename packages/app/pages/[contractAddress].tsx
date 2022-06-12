@@ -133,6 +133,7 @@ const ContractPage = (props: { contractAddress: string }) => {
             >
               {nfts
                 ?.concat(nfts)
+                ?.concat(nfts)
                 ?.slice()
                 .reverse()
                 .map((nft) => {
@@ -513,9 +514,19 @@ const MintNFT = (props: { contractAddress: string; close: () => void }) => {
         style={{ display: "none" }}
       />
 
-      <Button onClick={() => fileInput?.current?.click()}>Select Image</Button>
+      <Button
+        style={{
+          marginTop: "1rem",
+        }}
+        onClick={() => fileInput?.current?.click()}
+      >
+        Select Image
+      </Button>
       <br />
       <Button
+        style={{
+          marginTop: "1rem",
+        }}
         disabled={
           !(publicKey && blurImg && selectedFile && name && description) ||
           minting

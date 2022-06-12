@@ -55,7 +55,7 @@ const Home: NextPage = () => {
               setcontractAddress(res.address);
             }}
           >
-            Deploy marketplace contract deploy
+            Deploy marketplace contract
           </Button>
         </>
       )}
