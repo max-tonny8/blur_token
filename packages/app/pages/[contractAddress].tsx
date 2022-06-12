@@ -158,10 +158,7 @@ const ContractPage = (props: { contractAddress: string }) => {
                                   size="small"
                                   onClick={async () => {
                                     let price = prompt("price ETH?");
-                                    if (
-                                      price &&
-                                      Number.isInteger(Number(price))
-                                    ) {
+                                    if (price && !Number.isNaN(Number(price))) {
                                       await contract.functions.updateNFT(
                                         nft.id,
                                         ethers.utils.parseEther(price),
