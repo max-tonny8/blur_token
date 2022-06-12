@@ -4,6 +4,9 @@ const nextConfig = {
   experimental: {
     externalDir: true, // https://github.com/vercel/next.js/issues/9209#issuecomment-817214040
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;
