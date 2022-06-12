@@ -23,6 +23,7 @@ contract UnlockableNFT is ERC721URIStorage {
         string unlockableURL;
         NFTState state;
         address payable nextOwner;
+        string nextOwnerPublicKey;
     }
 
     mapping(uint256 => NFT) public nfts;
@@ -96,7 +97,7 @@ contract UnlockableNFT is ERC721URIStorage {
         return items;
     }
 
-    function buyNFT(uint256 _id) public payable {
+    function buyNFT(uint256 _id, string memory publicKey) public payable {
         require(_id > 0);
         NFT storage nft = nfts[_id];
 
@@ -109,6 +110,7 @@ contract UnlockableNFT is ERC721URIStorage {
 
         nft.state = NFTState.WaitingForApproval;
         nft.nextOwner = payable(msg.sender);
+        nft.nextOwnerPublicKey = publicKey;
     }
 
     function approveSale(uint256 _id, string memory newUnlockableURL) public {
@@ -122,6 +124,7 @@ contract UnlockableNFT is ERC721URIStorage {
 
         nft.owner = nft.nextOwner;
         nft.nextOwner = payable(0);
+        nft.nextOwnerPublicKey = "";
         nft.unlockableURL = newUnlockableURL;
 
         nft.state = NFTState.Sold;
