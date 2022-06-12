@@ -78,14 +78,16 @@ const ContractPage = (props: { contractAddress: string }) => {
     setOpen(false);
   };
 
+  if (!account?.address) {
+    return <Typography variant="h3">Please connect to your wallet</Typography>;
+  }
+
   if (isAccountSuccess && isSignerSuccess && account && signer) {
     console.log("signer: ", account, contract, UnlockableNFTJSON);
 
     return (
-      <div>
-        <Button variant="outlined" onClick={handleClickOpen}>
-          createNFT
-        </Button>
+      <>
+        <Button onClick={handleClickOpen}>Mint NFT</Button>
         <Dialog
           open={open}
           onClose={handleClose}
@@ -93,7 +95,11 @@ const ContractPage = (props: { contractAddress: string }) => {
           aria-describedby="alert-dialog-description"
           scroll="paper"
         >
-          <DialogTitle id="alert-dialog-title">{"Mint NFT"}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">
+            <Typography variant="h4" align="center">
+              Mint NFT
+            </Typography>
+          </DialogTitle>
           <DialogContent>
             <MintNFT
               contractAddress={props.contractAddress}
@@ -106,10 +112,10 @@ const ContractPage = (props: { contractAddress: string }) => {
         </Dialog>
 
         <br />
-        <GlowText>
-          {!nftsLoading ? (
-            <Box>
-              {/* <div
+
+        {!nftsLoading ? (
+          <Box>
+            {/* <div
                 style={{
                   wordWrap: "break-word",
                 }}
@@ -117,121 +123,154 @@ const ContractPage = (props: { contractAddress: string }) => {
                 {JSON.stringify(nfts)}
               </div> */}
 
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                }}
-              >
-                {nfts
-                  ?.slice()
-                  .reverse()
-                  .map((nft) => {
-                    return (
-                      <Card
-                        key={"id" + nft.id}
-                        sx={{ maxWidth: 300, margin: 2 }}
-                      >
-                        <CardMedia
-                          component={UnlockImage}
-                          unlockableURL={nft.unlockableURL}
-                          blurhash={nft.publicURL}
-                          tryUnlock={nft.owner === account!.address}
-                        />
-                        <CardContent>
-                          <Typography gutterBottom variant="h6" component="div">
-                            {nft.name} id:{nft.id.toString()} eth:
-                            {nft.price.toString()}
-                          </Typography>
-                          <Typography gutterBottom variant="h6" component="div">
-                            owner:0x...{nft.owner.slice(nft.owner.length - 6)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {nft.description}
-                          </Typography>
-                        </CardContent>
-                        <CardActions>
-                          {nft.owner === account.address ? (
-                            <>
-                              {nft.state === NFTState.Sold && (
-                                <Button
-                                  size="small"
-                                  onClick={async () => {
-                                    let price = prompt("price ETH?");
-                                    if (price && !Number.isNaN(Number(price))) {
-                                      await contract.functions.updateNFT(
-                                        nft.id,
-                                        ethers.utils.parseEther(price),
-                                        true,
-                                        {
-                                          gasLimit: 4000000,
-                                        }
-                                      );
-                                    }
-                                  }}
-                                >
-                                  <Typography color="text.secondary">
-                                    Sell
-                                  </Typography>
-                                </Button>
-                              )}
-                              {nft.state === NFTState.WaitingForApproval && (
-                                <Button
-                                  size="small"
-                                  onClick={async () => {
-                                    let a =
-                                      (await connector.activeConnector?.getProvider()) as providers.Web3Provider;
+            <Box
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {nfts
+                ?.concat(nfts)
+                ?.slice()
+                .reverse()
+                .map((nft) => {
+                  return (
+                    <Card key={"id" + nft.id} sx={{ width: 400, margin: 2 }}>
+                      <CardMedia
+                        component={UnlockImage}
+                        unlockableURL={nft.unlockableURL}
+                        blurhash={nft.publicURL}
+                        tryUnlock={nft.owner === account!.address}
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h6" component="div">
+                          {nft.name}
+                        </Typography>
 
-                                    let decrypted = await decrypt(
-                                      a,
-                                      account!.address,
-                                      nft.unlockableURL
-                                    );
-
-                                    let encrpytedLink = encrypt(
-                                      nft.nextOwnerPublicKey,
-                                      decrypted
-                                    );
-                                    console.log("encrpytedCid", encrpytedLink);
-
-                                    await contract.functions.approveSale(
-                                      nft.id,
-                                      encrpytedLink,
-                                      {
-                                        gasLimit: 4000000,
-                                      }
-                                    );
-                                  }}
-                                >
-                                  <Typography color="text.secondary">
-                                    Approve Sale
-                                  </Typography>
-                                </Button>
-                              )}
-                              {nft.state === NFTState.onSale && (
-                                <Button
-                                  size="small"
-                                  onClick={async () => {
+                        <Typography variant="body1" color="text.secondary">
+                          {nft.description}
+                        </Typography>
+                        <Typography
+                          gutterBottom
+                          variant="body2"
+                          component="div"
+                        >
+                          Owner: {nft.owner.slice(0, 4)}...
+                          {nft.owner.slice(nft.owner.length - 4)}
+                          {nft.owner === account!.address ? " (You)" : ""}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Price: {ethers.utils.formatEther(nft.price) + " ETH"}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          ID:{nft.id.toString()}
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        {nft.owner === account.address ? (
+                          <>
+                            {nft.state === NFTState.Sold && (
+                              <Button
+                                onClick={async () => {
+                                  let price = prompt("Price ETH?");
+                                  if (price && !Number.isNaN(Number(price))) {
                                     await contract.functions.updateNFT(
                                       nft.id,
-                                      1,
-                                      false,
+                                      ethers.utils.parseEther(price),
+                                      true,
                                       {
                                         gasLimit: 4000000,
                                       }
                                     );
-                                  }}
-                                >
-                                  <Typography color="text.secondary">
-                                    Revoke sell
-                                  </Typography>
-                                </Button>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              {nft.state === NFTState.onSale && (
+                                  }
+                                }}
+                              >
+                                Sell
+                              </Button>
+                            )}
+                            {nft.state === NFTState.WaitingForApproval && (
+                              <Button
+                                size="small"
+                                onClick={async () => {
+                                  let a =
+                                    (await connector.activeConnector?.getProvider()) as providers.Web3Provider;
+
+                                  let decrypted = await decrypt(
+                                    a,
+                                    account!.address,
+                                    nft.unlockableURL
+                                  );
+
+                                  let encrpytedLink = encrypt(
+                                    nft.nextOwnerPublicKey,
+                                    decrypted
+                                  );
+                                  console.log("encrpytedCid", encrpytedLink);
+
+                                  await contract.functions.approveSale(
+                                    nft.id,
+                                    encrpytedLink,
+                                    {
+                                      gasLimit: 4000000,
+                                    }
+                                  );
+                                }}
+                              >
+                                Approve Sale
+                              </Button>
+                            )}
+                            {nft.state === NFTState.onSale && (
+                              <Button
+                                size="small"
+                                onClick={async () => {
+                                  await contract.functions.updateNFT(
+                                    nft.id,
+                                    1,
+                                    false,
+                                    {
+                                      gasLimit: 4000000,
+                                    }
+                                  );
+                                }}
+                              >
+                                Cancel Sale
+                              </Button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {nft.state === NFTState.onSale && (
+                              <Button
+                                size="small"
+                                onClick={async () => {
+                                  let a =
+                                    (await connector.activeConnector?.getProvider()) as providers.Web3Provider;
+                                  console.log("mtt:", a);
+
+                                  let publicKey = await requestPublicKey(
+                                    a,
+                                    account!.address
+                                  );
+
+                                  await contract.functions.buyNFT(
+                                    nft.id,
+                                    publicKey,
+                                    {
+                                      value: nft.price,
+                                      gasLimit: 4000000,
+                                    }
+                                  );
+                                }}
+                              >
+                                Buy to unlock
+                              </Button>
+                            )}
+                            {nft.state === NFTState.WaitingForApproval &&
+                              nft.nextOwner === account!.address && (
                                 <Button
+                                  disabled
                                   size="small"
                                   onClick={async () => {
                                     let a =
@@ -253,57 +292,30 @@ const ContractPage = (props: { contractAddress: string }) => {
                                     );
                                   }}
                                 >
-                                  <Typography color="text.secondary">
-                                    {nft.price.toString()} ETH - Buy to unlock
-                                  </Typography>
+                                  waiting for approval
                                 </Button>
                               )}
-                              {nft.state === NFTState.WaitingForApproval &&
-                                nft.nextOwner === account!.address && (
-                                  <Button
-                                    disabled
-                                    size="small"
-                                    onClick={async () => {
-                                      let a =
-                                        (await connector.activeConnector?.getProvider()) as providers.Web3Provider;
-                                      console.log("mtt:", a);
-
-                                      let publicKey = await requestPublicKey(
-                                        a,
-                                        account!.address
-                                      );
-
-                                      await contract.functions.buyNFT(
-                                        nft.id,
-                                        publicKey,
-                                        {
-                                          value: nft.price,
-                                          gasLimit: 4000000,
-                                        }
-                                      );
-                                    }}
-                                  >
-                                    <Typography color="text.secondary">
-                                      waiting for approval
-                                    </Typography>
-                                  </Button>
-                                )}
-                            </>
-                          )}
-                        </CardActions>
-                      </Card>
-                    );
-                  })}
-              </div>
+                          </>
+                        )}
+                      </CardActions>
+                    </Card>
+                  );
+                })}
             </Box>
-          ) : (
-            <div>Loading...</div>
-          )}
-        </GlowText>
-      </div>
+          </Box>
+        ) : (
+          <Typography gutterBottom variant="h6" component="div">
+            Loading...
+          </Typography>
+        )}
+      </>
     );
   } else {
-    return <div>fail</div>;
+    return (
+      <Typography gutterBottom variant="h6" component="div">
+        Loading...
+      </Typography>
+    );
   }
 };
 
@@ -439,7 +451,11 @@ const MintNFT = (props: { contractAddress: string; close: () => void }) => {
         value={publicKey}
         onChange={(e) => setpublicKey(e.target.value)}
         id="outlined-basic"
-        label={publicKey ? "Public Key" : "Please click to get public key"}
+        label={
+          publicKey
+            ? "Public Key"
+            : "Please click to get public key from MetaMask"
+        }
         variant="outlined"
         disabled
         onClick={async () => {
@@ -466,8 +482,8 @@ const MintNFT = (props: { contractAddress: string; close: () => void }) => {
           </Typography>
           <Blurhash
             hash={blurImg}
-            width={400}
-            height={300}
+            width={300}
+            height={170}
             resolutionX={32}
             resolutionY={32}
             punch={1}
@@ -479,9 +495,10 @@ const MintNFT = (props: { contractAddress: string; close: () => void }) => {
           <Typography variant="body2" color="text.secondary">
             Secret Image:
           </Typography>
-          <img src={base64Img} alt="" width={"500px"} />{" "}
+          <img src={base64Img} alt="" height={170} />
         </>
       )}
+      <br />
 
       <input
         type="file"
@@ -496,19 +513,13 @@ const MintNFT = (props: { contractAddress: string; close: () => void }) => {
         style={{ display: "none" }}
       />
 
-      <Button
-        className="upload-btn"
-        onClick={() => fileInput?.current?.click()}
-      >
-        Select Image
-      </Button>
+      <Button onClick={() => fileInput?.current?.click()}>Select Image</Button>
       <br />
       <Button
         disabled={
           !(publicKey && blurImg && selectedFile && name && description) ||
           minting
         }
-        className="upload-btn"
         onClick={async () => {
           setminting(true);
           let cid = await uploadFile(selectedFile!);
@@ -529,7 +540,7 @@ const MintNFT = (props: { contractAddress: string; close: () => void }) => {
             )
           );
           setminting(false);
-          //   props.close();
+          props.close();
         }}
       >
         {minting ? "Minting" : "Upload"}
@@ -561,7 +572,7 @@ const UnlockImage = (props: {
 
   return (
     <>
-      {decrypted ? (
+      {props.tryUnlock && decrypted ? (
         <img src={decrypted} width={400} height={300} />
       ) : (
         <div style={{ position: "relative", height: 300 }}>
@@ -604,16 +615,16 @@ const UnlockImage = (props: {
   );
 };
 
-const GlowText = (props) => {
-  return <Typography>{props.children}</Typography>;
-};
-
 const Contract: NextPage = () => {
   const router = useRouter();
 
   const { contractAddress } = router.query;
   if (!contractAddress || Array.isArray(contractAddress)) {
-    return <div>no contract address</div>;
+    return (
+      <Typography gutterBottom variant="h6" component="div">
+        Loading... - No contract address
+      </Typography>
+    );
   }
 
   return <ContractPage contractAddress={contractAddress} />;

@@ -14,11 +14,10 @@ import {
   useSigner,
 } from "wagmi";
 import UnlockableNFTJSON from "../../hardhat/artifacts/contracts/UnlockableNFT.sol/UnlockableNFT.json";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { useRouter } from "next/router";
-
 
 const Home: NextPage = () => {
   const [contractAddress, setcontractAddress] = useState("");
@@ -26,21 +25,27 @@ const Home: NextPage = () => {
   const { data: signer, isSuccess: isSignerSuccess } = useSigner();
   const router = useRouter();
 
+  if (!account?.address) {
+    return <Typography variant="h3">Please connect to your wallet</Typography>;
+  }
+
   return (
     <>
       {contractAddress != "" ? (
         <>
           <Button
+            variant="contained"
             onClick={() => {
               router.push(`/${contractAddress}`);
             }}
           >
-            Go to contract {contractAddress}
+            Go to marketplace contract {contractAddress}
           </Button>
         </>
       ) : (
         <>
-          <button
+          <Button
+            variant="contained"
             onClick={async () => {
               var a = new UnlockableNFT__factory(signer);
               var res = await a.deploy({ gasLimit: 10000000 });
@@ -50,9 +55,8 @@ const Home: NextPage = () => {
               setcontractAddress(res.address);
             }}
           >
-            deploy
-          </button>
-          <div>not intialized</div>
+            Deploy marketplace contract deploy
+          </Button>
         </>
       )}
     </>

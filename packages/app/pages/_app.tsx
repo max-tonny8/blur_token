@@ -6,6 +6,8 @@ import {
   RainbowKitProvider,
   ConnectButton,
   darkTheme,
+  connectorsForWallets,
+  wallet,
 } from "@rainbow-me/rainbowkit";
 import {
   allChains,
@@ -20,6 +22,7 @@ import {
   createTheme,
   CssBaseline,
   ThemeProvider,
+  Typography,
 } from "@mui/material";
 import Head from "next/head";
 import dynamic from "next/dynamic";
@@ -27,10 +30,13 @@ import React from "react";
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, provider } = configureChains(allChains, [publicProvider()]);
-const { connectors } = getDefaultWallets({
-  appName: "My RainbowKit App",
-  chains,
-});
+
+const connectors = connectorsForWallets([
+  {
+    groupName: "Recommended",
+    wallets: [wallet.metaMask({ chains })],
+  },
+]);
 const wagmiClient = createClient({
   autoConnect: true,
   connectors,
@@ -44,23 +50,26 @@ const NoSSRWrapper = dynamic(() => Promise.resolve(React.Fragment), {
 // https://trishalim.hashnode.dev/css-tricks-to-create-that-dark-futuristic-web3-look?utm_source=tldrnewsletter
 // https://mui.com/material-ui/customization/theme-components/
 const theme = createTheme({
-  palette: {
-    mode: "dark",
-  },
+  // palette: {
+  //   mode: "dark",
+  // },
   components: {
     MuiButton: {
+      defaultProps: {
+        variant: "contained",
+      },
       styleOverrides: {
         root: {
           backgroundImage:
             "linear-gradient(to right, rgb(1 134 218), rgb(182 49 167))",
           border: 0,
-          color: "rgba(var(--text-color))",
           ":hover": {
             boxShadow: "rgba(var(--primary-color), 0.5) 0px 0px 20px 0px",
           },
         },
       },
     },
+
     MuiTypography: {
       styleOverrides: {
         root: {
@@ -85,17 +94,38 @@ function MyApp({ Component, pageProps }: AppProps) {
         <WagmiConfig client={wagmiClient}>
           <RainbowKitProvider
             coolMode
-            showRecentTransactions={true}
+            showRecentTransactions={false}
             chains={chains}
-            theme={darkTheme()}
+            // theme={darkTheme()}
           >
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <Container>
-                <Box sx={{}}>
+                <Typography variant="h4" align="center">
+                  Decentralized Unlockable NFT Marketplace
+                </Typography>
+                <Box
+                  sx={{
+                    margin: "2rem",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    display: "flex",
+                    flexWrap: "wrap",
+                  }}
+                >
                   <ConnectButton />
                 </Box>
-                <Component {...pageProps} />
+                <Box
+                  sx={{
+                    margin: "2rem",
+                    alignItems: "center",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Component {...pageProps} />
+                </Box>
               </Container>
             </ThemeProvider>
           </RainbowKitProvider>

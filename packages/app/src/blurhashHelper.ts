@@ -23,7 +23,7 @@ const encodeImageToBlurhash = async (imageUrl: string) => {
   const image = await loadImage(imageUrl);
   const imageData = getImageData(image);
   if (!imageData) return;
-  return encode(imageData.data, imageData.width, imageData.height, 4, 4);
+  return encode(imageData.data, imageData.width, imageData.height, 8, 8);
 };
 
 export { encodeImageToBlurhash, loadImage, getImageData };
